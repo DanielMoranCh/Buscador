@@ -3,7 +3,7 @@ $(document).ready(function () {
   var datos = [];
   var j = 0;
   ciudad.empty();
-  ciudad.append('<option selected="true" disabled>Elige una ciudad</option>');
+  ciudad.append('<option selected="true" disabled value="0">Elige una ciudad</option>');
   ciudad.prop('selectedIndex', 0);
 
   const url = 'data-1.json';
@@ -26,7 +26,7 @@ $(document).ready(function () {
   var datos = [];
   var j = 0;
   tipo.empty();
-  tipo.append('<option selected="true" disabled>Elige un tipo</option>');
+  tipo.append('<option selected="true" disabled value="0">Elige un tipo</option>');
   tipo.prop('selectedIndex', 0);
   // LISTA DE TIPOS
   $.getJSON(url, function (data) {
@@ -49,6 +49,7 @@ $(document).ready(function () {
 function getDatos(){
   //var HtmlNode = document.getElementById('datos');
   var showData = $('#show-data');
+  showData.empty();
   $.getJSON('data-1.json', function (data) {
 
     //  alert(data);
@@ -64,6 +65,48 @@ function getDatos(){
          +  '<li> Precio: ' + val.Precio + '</li>';
         var list = $('<ul/></div>').html(content);
         showData.append(list);
+      })
+    });
+}
+
+function getBusqueda(){
+  var ciudad = document.getElementById('selectCiudad');
+  var tipo = document.getElementById('selectTipo');
+  var slider = $("#rangoPrecio").data("ionRangeSlider");
+  var showData = $('#show-data');
+  // Get values
+  var from = slider.result.from;
+  var to = slider.result.to;
+
+  // Saving it's instance to var
+  showData.empty();
+
+  $.getJSON('data-1.json', function (data) {
+
+    //  alert(data);
+
+      data.forEach(function(val , i){
+        //alert(val.Direccion);
+        let precio = val.Precio.replace(",", "");
+        precio =  parseFloat(precio.replace("$", ""));
+        if((ciudad.value!="0" || tipo.value!="0") && precio > from && precio < to ){
+          //alert(ciudad.value);
+            var content = '<div class="tituloContenido card"><ul>'
+             + '<li> Direccion: ' + val.Direccion + '</li>'
+             + '<li> Ciudad: ' + val.Ciudad + '</li>'
+             + '<li> Telefono: ' + val.Telefono + '</li>'
+             +  '<li> Codigo_Postal: ' + val.Codigo_Postal + '</li>'
+             +  '<li> Tipo: ' + val.Tipo + '</li>'
+             +  '<li> Precio: ' + val.Precio + '</li>';
+            var list = $('<ul/></div>').html(content);
+
+          if(ciudad.value!="0" && tipo.value!="0" && ciudad.value==val.Ciudad && tipo.value==val.Tipo)
+              showData.append(list);
+          else if(ciudad.value!="0" && tipo.value=="0" && ciudad.value==val.Ciudad)
+               showData.append(list);
+          else if(tipo.value!="0" && ciudad.value=="0" && tipo.value==val.Tipo)
+                 showData.append(list);
+        }
       })
     });
 }
@@ -122,8 +165,8 @@ function inicializarSlider(){
       $("#rangoPrecio").ionRangeSlider({
         type: "double",
         grid: false,
-        min: 0,
-        max: 100000,
+        min: minimo,
+        max: maximo,
         from: minimo,
         to: maximo,
         prefix: "$"
